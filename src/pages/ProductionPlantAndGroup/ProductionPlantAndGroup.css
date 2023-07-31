@@ -1,0 +1,57 @@
+.modifiedEditTable td {
+    padding-top: 0px;
+    padding-bottom: 0px;
+    /* border-right-width: 1px; */
+    border-left-width: 1px;
+}
+
+.modifiedEditTable th {
+    border-top-width: 1px;
+    padding-top: 0.4rem;
+    padding-bottom: 0.4rem;
+    /* border-right-width: 1px; */
+    border-left-width: 1px;
+}
+
+.modifiedEditTable .MuiTableContainer-root,
+.modifiedEditTable .css-yrrxq6-MuiTableContainer-root {
+    border-right-width: 1px;
+
+}
+
+.modifiedEditTable .MuiBox-root {
+    padding-bottom: 0px;
+    padding-top: 0px;
+}
+
+.modifiedEditTable .MuiToolbar-root {
+    min-height: 2.5rem;
+}
+
+.modifiedEditTable .MuiButtonBase-root .MuiIconButton-root .MuiIconButton-colorError {
+    padding-bottom: 5px;
+    padding-top: 5px;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+.modifiedEditTable .css-g2tram-MuiToolbar-root {
+    display: none;
+}
+
+.modifiedEditTable .css-80pr5n-MuiPaper-root {
+    box-shadow: none;
+}
+
+.modifiedEditTable .css-1hhu9xl {
+    box-shadow: none;
+}
+
+.modifiedEditTable .css-sq9qdz {
+    justify-content: end;
+    align-items: center;
+}
+
+/* .modifiedEditTable .MuiTableRow-root:focus {
+    background-color: rgba(233, 238, 250, 0.82);
+} */
