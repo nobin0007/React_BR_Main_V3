@@ -28,7 +28,6 @@ import {
     Tooltip,
     Stack
 } from "@mui/material";
-import { createFilterOptions } from '@mui/material/Autocomplete';
 import { Delete, Edit } from '@mui/icons-material';
 
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
@@ -97,14 +96,8 @@ const VoucherAgainstVoucher = (props) => {
 
     const { voucherToEdit, setVoucherToEdit, jvToEdit, setJvToEdit, contraVouchToEdit, setContraVouchToEdit, debitVouchToEdit, setDebitVouchToEdit, creditVouchToEdit, setCreditVouchToEdit, vouchAgtVouchToEdit, setVouchAgtVouchToEdit } = useStateContext();
 
-
-    //CHECK if userInfo is availaible, if not, redirect to login
-    const navigate = useNavigate();
-    if (!(localStorage.getItem("userInfo"))) {
-        navigate('/');
-    }
-
     // ---[show/hide panel,navbar]---
+    const navigate = useNavigate();
     const { setShowPanel, setShowNavbar } = useStateContext();
     useEffect(() => {
         setShowPanel(props.panelShow);
@@ -119,7 +112,9 @@ const VoucherAgainstVoucher = (props) => {
         console.log("Session User");
         console.log(userInfo);
     }
-
+    if (!(localStorage.getItem("userInfo"))) {
+        navigate('/');
+    }
     const [attachments, setAttachments] = useState([]);
     const { register, getValues, reset, control, setValue } = useForm();
 
@@ -149,10 +144,6 @@ const VoucherAgainstVoucher = (props) => {
     const [dateFrom, setDateFrom] = useState(dayjs());
     const [dateTo, setDateTo] = useState(dayjs());
     const [prevVouchNo, setPrevVouchNo] = useState({ VoucherNo: '', VoucherId: '' });
-    const [tempPrevVouchNo, setTempPrevVouchNo] = useState({ VoucherNo: '', VoucherId: '' });
-    const [locationOptsForPrevVouch, setLocationOptsForPrevVouch] = useState([]);
-    const [locationPrevVouchFilter, setLocationPrevVouchFilter] = useState({ Name: 'All Location', LocationId: 0 });
-
 
     const [prevVouchNoOpts, setPrevVouchNoOpts] = useState([]);
     const prevVouchElement = useRef();
@@ -338,7 +329,7 @@ const VoucherAgainstVoucher = (props) => {
                     onBlur={(e) => {
                         if (e.target.value > 0) {
                             if (voucherTableData[cell.row.index].accountHead.AccountsId) {
-                                voucherTableData[cell.row.index].debit = parseFloat(e.target.value).toFixed(2);
+                                voucherTableData[cell.row.index].debit = e.target.value;
                                 voucherTableData[cell.row.index].credit = 0;
                                 setVoucherTableData([...voucherTableData]);
                                 setdebitCreditWatch((prev) => !prev);
@@ -376,7 +367,7 @@ const VoucherAgainstVoucher = (props) => {
                     onBlur={(e) => {
                         if (e.target.value > 0) {
                             if (voucherTableData[cell.row.index].accountHead.AccountsId) {
-                                voucherTableData[cell.row.index].credit = parseFloat(e.target.value).toFixed(2);
+                                voucherTableData[cell.row.index].credit = e.target.value;
                                 voucherTableData[cell.row.index].debit = 0;
                                 setVoucherTableData([...voucherTableData]);
                                 setdebitCreditWatch((prev) => !prev);
@@ -465,11 +456,11 @@ const VoucherAgainstVoucher = (props) => {
         let totalCredit = 0;
         for (let i = 0; i < voucherTableData.length; i++) {
             if (voucherTableData[i].debit || voucherTableData[i].credit) {
-                totalDebit = totalDebit + (isNaN(parseFloat(voucherTableData[i].debit)) ? 0 : parseFloat(voucherTableData[i].debit));
-                totalCredit = totalCredit + (isNaN(parseFloat(voucherTableData[i].credit)) ? 0 : parseFloat(voucherTableData[i].credit));
+                totalDebit = totalDebit + (isNaN(parseInt(voucherTableData[i].debit)) ? 0 : parseInt(voucherTableData[i].debit));
+                totalCredit = totalCredit + (isNaN(parseInt(voucherTableData[i].credit)) ? 0 : parseInt(voucherTableData[i].credit));
             }
         }
-        setTotal({ debit: totalDebit.toFixed(2), credit: totalCredit.toFixed(2) });
+        setTotal({ debit: totalDebit, credit: totalCredit });
         console.log(total);
     }, [debitCreditWatch])
 
@@ -522,11 +513,7 @@ const VoucherAgainstVoucher = (props) => {
                 res.json()
                 // console.log(res);
             )
-            .then((data) => {
-                console.log(data);
-                setLocation(data);
-                setLocationOptsForPrevVouch([{ LocationId: 0, Name: 'All Location' }, ...data]);
-            })
+            .then((data) => { console.log(data); setLocation(data) })
 
         fetch(`${userInfo.Ip}/API/VouchAgtVouch/Get_Project?companyId=${userInfo.CompanyId}`)
             .then(res =>
@@ -572,14 +559,12 @@ const VoucherAgainstVoucher = (props) => {
 
         let dto = dayjs(dayjs()).format('YYYY/MM/DD') + " 23:59";
         let dfrom = dayjs(dayjs()).format('YYYY/MM/DD') + " 00:00";
-        fetch(`${userInfo.Ip}/API/VouchAgtVouch/Get_PrevVouchNo?dateTo=${dto}&dateFrom=${dfrom}&locationId=${0}&companyId=${userInfo.CompanyId}`)
+        fetch(`${userInfo.Ip}/API/VouchAgtVouch/Get_PrevVouchNo?dateTo=${dto}&dateFrom=${dfrom}&locationId=${userInfo.LocationId}&companyId=${userInfo.CompanyId}`)
             .then(res =>
                 res.json()
             )
             .then((data) => {
-                if (data.length > 0) {
-                    data.unshift({ VoucherId: '' }); //eita kora autocomplete suggestion e column name ashar jonno
-                }
+
                 setPrevVouchNoOpts(data);
             })
 
@@ -634,11 +619,11 @@ const VoucherAgainstVoucher = (props) => {
 
                 // --[calculating previous remainder debit/credit and inputing it into the next debit/credit auto]--
                 if (((index - 1) > -1) && total.debit > total.credit) {
-                    prevTableDataOld[index].credit = (total.debit - total.credit).toFixed(2);
+                    prevTableDataOld[index].credit = total.debit - total.credit;
                     prevTableDataOld[index].debit = 0;
                 }
                 else if (((index - 1) > -1) && total.debit < total.credit) {
-                    prevTableDataOld[index].debit = (total.credit - total.debit).toFixed(2);
+                    prevTableDataOld[index].debit = total.credit - total.debit;
                     prevTableDataOld[index].credit = 0;
                 }
 
@@ -690,8 +675,8 @@ const VoucherAgainstVoucher = (props) => {
 
             if (!rowIsEmpty) {
 
-                let perRowDebit = isNaN(parseFloat(tableAllRows[i].debit)) ? 0 : parseFloat(tableAllRows[i].debit);
-                let perRowCredit = isNaN(parseFloat(tableAllRows[i].credit)) ? 0 : parseFloat(tableAllRows[i].credit)
+                let perRowDebit = isNaN(parseInt(tableAllRows[i].debit)) ? 0 : parseInt(tableAllRows[i].debit);
+                let perRowCredit = isNaN(parseInt(tableAllRows[i].credit)) ? 0 : parseInt(tableAllRows[i].credit)
                 let propertyName = `${tableAllRows[i].name.TableName}Id`
                 let perRowForbackend = {};
 
@@ -816,9 +801,6 @@ const VoucherAgainstVoucher = (props) => {
         setVoucherDateState(dayjs());
         setDateTo(dayjs());
         setDateFrom(dayjs());
-
-        setLocationPrevVouchFilter({ Name: 'All Location', LocationId: 0 });
-
         setLocationOutput({ Name: userInfo.LocationName, LocationId: userInfo.LocationId });
         setTotal({ debit: 0, credit: 0 });
         reset();
@@ -826,8 +808,6 @@ const VoucherAgainstVoucher = (props) => {
         setDeletedRegedAttach([]);
         setDeletedVoucherDTRows([]);
         setPrevVouchNo({ VoucherNo: '', VoucherId: '' });
-        setTempPrevVouchNo({ VoucherNo: '', VoucherId: '' });
-
         //reseting the prev voucher no options---------------------------------
         let dto = dayjs(dayjs()).format('YYYY/MM/DD') + " 23:59";
         let dfrom = dayjs(dayjs()).format('YYYY/MM/DD') + " 00:00";
@@ -837,9 +817,6 @@ const VoucherAgainstVoucher = (props) => {
             )
             .then((data) => {
                 // setPrevVouchNoOpts([]);
-                if (data.length > 0) {
-                    data.unshift({ VoucherId: '' }); //eita kora autocomplete suggestion e column name ashar jonno
-                }
                 setPrevVouchNoOpts(data);
             })
 
@@ -1032,8 +1009,8 @@ const VoucherAgainstVoucher = (props) => {
 
             if (!rowIsEmpty) {
 
-                let perRowDebit = isNaN(parseFloat(tableAllRows[i].debit)) ? 0 : parseFloat(tableAllRows[i].debit);
-                let perRowCredit = isNaN(parseFloat(tableAllRows[i].credit)) ? 0 : parseFloat(tableAllRows[i].credit)
+                let perRowDebit = isNaN(parseInt(tableAllRows[i].debit)) ? 0 : parseInt(tableAllRows[i].debit);
+                let perRowCredit = isNaN(parseInt(tableAllRows[i].credit)) ? 0 : parseInt(tableAllRows[i].credit)
                 let propertyName = `${tableAllRows[i].name.TableName}Id`
                 let perRowForbackend = {};
 
@@ -1229,10 +1206,10 @@ const VoucherAgainstVoucher = (props) => {
 
     const prevVouchSelectionModalstyle = {
         position: 'absolute',
-        top: '40%',
+        top: '50%',
         left: '50%',
         transform: 'translate(-50%, -50%)',
-        width: '98%',
+        width: '40%',
         bgcolor: 'background.paper',
         border: '2px solid #000',
         boxShadow: 24,
@@ -1242,7 +1219,7 @@ const VoucherAgainstVoucher = (props) => {
     const clickIconPrevVoucherNo = () => {
         console.log("rupom modal");
         console.log(prevVouchElement);
-        setTempPrevVouchNo(prevVouchNo);
+
         handlePrevModalOpen();
 
     }
@@ -1272,12 +1249,9 @@ const VoucherAgainstVoucher = (props) => {
             setValue("description", "");
             setAttachments([]);
         }
-        else {
-            console.log(selectedOption);
-            setPrevVouchNo(selectedOption);
-            setPrevVouchSelectModalOpen(false);
-        }
-
+        console.log(selectedOption);
+        setPrevVouchNo(selectedOption);
+        setPrevVouchSelectModalOpen(false);
 
         if (selectedOption?.VoucherId) {
             // fetch hobe with that voucher id to assign everything
@@ -1287,7 +1261,7 @@ const VoucherAgainstVoucher = (props) => {
                     // console.log(res);
                 )
                 .then((data) => {
-                    console.log("rupom yo yo voucher NEW>>>>>>>>>> numbers");
+                    console.log("rupom yo yo voucher numbers");
                     console.log(data);
                     setVoucherTableData(emptyRows);
 
@@ -1297,11 +1271,8 @@ const VoucherAgainstVoucher = (props) => {
         }
     }
 
-    const handleOnSelectPrevVouch = (selectedOption) => {
-
-        // if (selectedOption) {
+    const handleOnSelectPrevVouch = (e, selectedOption) => {
         setPrevVouchSelectModalOpen(false);
-        // }
 
 
         let tableAllRows = _.cloneDeep(voucherTableData);
@@ -1432,13 +1403,6 @@ const VoucherAgainstVoucher = (props) => {
 
 
 
-    //customized filter for pervVoucherNo autocomplete
-    const filterOptions = createFilterOptions({
-        matchFrom: 'any',
-        stringify: (option) => option.VoucherNo + ' ' + option.Description + ' ' + option.BuyerName + ' ' + option.BuyerPhone + ' ' + option.Remarks + ' ' + option.CollectionMode + ' ' + option.CollectedAmount + ' ' + option.Location,
-        limit: 100,
-    });
-
     return (
         // return wrapper div
         <div className='mt-16 md:mt-2'>
@@ -1504,7 +1468,7 @@ const VoucherAgainstVoucher = (props) => {
                                             options={location}
                                             // defaultValue={(locationOutput) ? locationOutput : { Name: "", LocationId: "" }}
                                             value={locationOutput}
-                                            readOnly={true}
+                                            readOnly={voucherIs ? true : false}
                                             // defaultValue={locationOutput?.Name ? locationOutput?.Name : ''}
                                             getOptionLabel={(option) => (option.Name) ? option.Name : ""}
 
@@ -1795,7 +1759,7 @@ const VoucherAgainstVoucher = (props) => {
                 <Box sx={prevVouchSelectionModalstyle}>
                     <fieldset className=" border border-solid border-gray-300 px-3 pt-1 pb-3 dark:text-slate-50">
                         <legend className="text-sm">Select a Prevoius Voucher No. </legend>
-                        <div className=' grid-cols-3 grid gap-x-4 gap-y-1'>
+                        <div className=' grid-cols-2 grid gap-x-4 gap-y-1'>
 
                             <LocalizationProvider dateAdapter={AdapterDayjs}>
                                 <DatePicker
@@ -1829,18 +1793,24 @@ const VoucherAgainstVoucher = (props) => {
                                                 // var sendInfo = { DateTo: dto, DateFrom: dfrom, VoucherType: voucherTypeOutput.Name, LocationId: userInfo.LocationId, CompanyId: userInfo.CompanyId }
                                                 // console.log(sendInfo);
 
-                                                fetch(`${userInfo.Ip}/API/VouchAgtVouch/Get_PrevVouchNo?dateTo=${dto}&dateFrom=${dfrom}&locationId=${locationPrevVouchFilter.LocationId}&companyId=${userInfo.CompanyId}`)
+                                                fetch(`${userInfo.Ip}/API/VouchAgtVouch/Get_PrevVouchNo?dateTo=${dto}&dateFrom=${dfrom}&locationId=${userInfo.LocationId}&companyId=${userInfo.CompanyId}`)
                                                     .then(res =>
                                                         res.json()
                                                         // console.log(res);
                                                     )
                                                     .then((data) => {
-                                                        console.log("HELLO>>>> VOUCHER NUMBERS With Other Infos");
+                                                        console.log("rupom yo yo voucher numbers");
                                                         console.log(data);
-                                                        if (data.length > 0) {
-                                                            data.unshift({ VoucherId: '' });
-                                                        }
-                                                        setPrevVouchNoOpts(data);
+
+                                                        let rupomx = [
+                                                            { VoucherNo: 'VoucherNo', BuyerName: 'BuyerName', BuyerPhone: 'BuyerPhone', VouchRefer: 'VouchRefer' },
+                                                            { VoucherNo: '2', BuyerName: 'Rupom', BuyerPhone: '0194234', VouchRefer: '8576883' },
+                                                            { VoucherNo: '3', BuyerName: 'Nobin', BuyerPhone: '0185234', VouchRefer: '9643034' },
+                                                            { VoucherNo: '4', BuyerName: 'Saiful', BuyerPhone: '0174234', VouchRefer: '4554857' }
+                                                        ]
+
+                                                        setPrevVouchNoOpts(rupomx);
+                                                        console.log(prevVouchNoOpts);
                                                     })
 
                                                 // fetch(`${userInfo.Ip}/API/VoucherEdit/Get_VoucherNo?dateTo=${dto}&dateFrom=${dfrom}&vocuherType=JV&locationId=${userInfo.LocationId}&companyId=${userInfo.CompanyId}`)
@@ -1901,17 +1871,14 @@ const VoucherAgainstVoucher = (props) => {
                                                 // var sendInfo = { DateTo: dto, DateFrom: dfrom, VoucherType: voucherTypeOutput.Name, LocationId: userInfo.LocationId, CompanyId: userInfo.CompanyId }
                                                 // console.log(sendInfo);
 
-                                                fetch(`${userInfo.Ip}/API/VouchAgtVouch/Get_PrevVouchNo?dateTo=${dto}&dateFrom=${dfrom}&locationId=${locationPrevVouchFilter.LocationId}&companyId=${userInfo.CompanyId}`)
+                                                fetch(`${userInfo.Ip}/API/VouchAgtVouch/Get_PrevVouchNo?dateTo=${dto}&dateFrom=${dfrom}&locationId=${userInfo.LocationId}&companyId=${userInfo.CompanyId}`)
                                                     .then(res =>
                                                         res.json()
                                                         // console.log(res);
                                                     )
                                                     .then((data) => {
-                                                        console.log("HELLO>>>> VOUCHER NUMBERS With Other Infos");
+                                                        console.log("rupom yo yo voucher numbers");
                                                         console.log(data);
-                                                        if (data.length > 0) {
-                                                            data.unshift({ VoucherId: '' }); //eita kora autocomplete suggestion e column name ashar jonno
-                                                        }
                                                         setPrevVouchNoOpts(data);
                                                     })
 
@@ -1924,69 +1891,23 @@ const VoucherAgainstVoucher = (props) => {
                                     }}
                                 />
                             </LocalizationProvider>
-
-                            <Autocomplete
-                                id="locationPrevVouchFilter"
-                                clearOnEscape
-                                size="small"
-
-                                options={locationOptsForPrevVouch}
-                                // defaultValue={(locationOutput) ? locationOutput : { Name: "", LocationId: "" }}
-                                value={locationPrevVouchFilter}
-                                // readOnly={voucherIs ? true : false}
-                                // defaultValue={locationOutput?.Name ? locationOutput?.Name : ''}
-                                getOptionLabel={(option) => (option.Name) ? option.Name : ""}
-
-                                onChange={(e, selectedOption) => {
-                                    console.log(selectedOption);
-                                    setLocationPrevVouchFilter(selectedOption);
-
-                                    let dto = dayjs(dateTo).format('YYYY/MM/DD') + " 23:59";
-                                    let dfrom = dayjs(dateFrom).format('YYYY/MM/DD') + " 00:00";
-                                    fetch(`${userInfo.Ip}/API/VouchAgtVouch/Get_PrevVouchNo?dateTo=${dto}&dateFrom=${dfrom}&locationId=${selectedOption.LocationId}&companyId=${userInfo.CompanyId}`)
-                                        .then(res =>
-                                            res.json()
-                                        )
-                                        .then((data) => {
-
-                                            setPrevVouchNoOpts(data);
-                                        })
-
-                                }}
-                                renderInput={(params) => (
-                                    <TextField
-                                        sx={{ width: '100%', marginTop: 1 }}
-                                        {...params}
-                                        {...register("locationPrevVouchFilter")}
-
-                                        InputProps={{ ...params.InputProps, style: { fontSize: 13 } }}
-                                        InputLabelProps={{
-                                            ...params.InputLabelProps, style: { fontSize: 14 },
-
-                                        }}
-                                        onChange={(newValue) => {
-                                            console.log("autocomp Changed")
-                                        }}
-                                        label="Filter With Location" variant="standard" />
-                                )}
-                            />
-
-
-                            <div className='col-span-3'>
+                            <div className='col-span-2'>
                                 <Autocomplete
                                     id="Voucher No."
                                     clearOnEscape
                                     size="small"
-                                    className=''
+                                    className='col-span-3'
                                     options={prevVouchNoOpts}
-                                    filterOptions={filterOptions}
                                     // defaultValue={(locationOutput) ? locationOutput : { Name: "", LocationId: "" }}
-                                    value={tempPrevVouchNo ? tempPrevVouchNo : ""}
+                                    value={prevVouchNo ? prevVouchNo : ""}
+
+                                    // defaultValue={locationOutput?.Name ? locationOutput?.Name : ''}
                                     getOptionLabel={(option) => (option.VoucherNo) ? option.VoucherNo : ""}
 
                                     onChange={(e, selectedOption) => {
-                                        setTempPrevVouchNo(selectedOption);
+                                        handleOnSelectPrevVouch(e, selectedOption);
                                     }}
+                                    // defaultValue={top100Films[2]}
                                     renderInput={(params) => (
                                         <TextField
                                             sx={{ width: '100%', marginTop: 1 }}
@@ -1996,73 +1917,53 @@ const VoucherAgainstVoucher = (props) => {
                                                 ...params.InputLabelProps, style: { fontSize: 14 },
 
                                             }}
-                                            // onChange={(newValue) => {
-                                            //     console.log("autocomp Changed")
-                                            // }}
+                                            onChange={(newValue) => {
+                                                console.log("autocomp Changed")
+                                            }}
                                             label="Previous Voucher No." variant="standard" />
                                     )}
 
-                                    renderOption={(props, option) =>
-                                    (
-                                        <div>
-                                            {option.VoucherId === '' ? (
-                                                <div className='grid grid-cols-8 gap-x-0 shadow-md'>
-                                                    <p className='border-1 p-2 border-[#e3e3e3] font-medium '>Voucher No.</p>
-                                                    <p className='border-1 p-2 border-[#e3e3e3] font-medium '>Voucher Description</p>
-                                                    <p className='border-1 p-2 border-[#e3e3e3] font-medium '>Buyer Name</p>
-                                                    <p className='border-1 p-2 border-[#e3e3e3] font-medium '>Buyer Phone</p>
-                                                    <p className='border-1 p-2 border-[#e3e3e3] font-medium '>Collection Remarks</p>
-                                                    <p className='border-1 p-2 border-[#e3e3e3] font-medium '>Collection Mode</p>
-                                                    <p className='border-1 p-2 border-[#e3e3e3] font-medium '>Collected Amount</p>
-                                                    <p className='border-1 p-2 border-[#e3e3e3] font-medium '>Location</p>
+                                    renderOption={(option) => (
+                                        // <TableContainer>
+                                        //     <Table>
+                                        //         <TableBody>
+                                        //             {prevVouchNoOpts.map((option) => (
+                                        //                 <TableRow key={option.VoucherId}>
+                                        //                     <TableCell>{option.VoucherId}</TableCell>
+                                        //                     <TableCell>{option.VoucherNo}</TableCell>
+                                        //                 </TableRow>
+                                        //             ))}
+                                        //         </TableBody>
+                                        //     </Table>
+                                        // </TableContainer>
 
-                                                </div>
+                                        <table>
+                                            {option?.VoucherNo === 'VoucherNo' ? (
+                                                <thead>
+                                                    <tr>
+                                                        <th>VoucherNo</th>
+                                                        <th>BuyerName</th>
+                                                        <th>BuyerPhone</th>
+                                                        <th>VoucherRefer</th>
+
+                                                    </tr>
+                                                </thead>
                                             ) : (
-                                                <div {...props} className='grid grid-cols-8 gap-x-0 cursor-pointer hover:bg-[#a9c4fa]' key={option.VoucherId}>
-                                                    <p className='border-1 p-2 border-[#e3e3e3]'>{option.VoucherNo ? option.VoucherNo : ''}</p>
-                                                    <p className='border-1 p-2 border-[#e3e3e3]'>{option.Description ? option.Description : ''}</p>
-                                                    <p className='border-1 p-2 border-[#e3e3e3]'>{option.BuyerName ? option.BuyerName : ''}</p>
-                                                    <p className='border-1 p-2 border-[#e3e3e3]'>{option.BuyerPhone ? option.BuyerPhone : ''}</p>
-                                                    <p className='border-1 p-2 border-[#e3e3e3]'>{option.Remarks ? option.Remarks : ''}</p>
-                                                    <p className='border-1 p-2 border-[#e3e3e3]'>{option.CollectionMode ? option.CollectionMode : ''}</p>
-                                                    <p className='border-1 p-2 border-[#e3e3e3]'>{option.CollectedAmount ? option.CollectedAmount : ''}</p>
-                                                    <p className='border-1 p-2 border-[#e3e3e3]'>{option.Location ? option.Location : ''}</p>
-                                                </div>
+                                                <tbody>
+                                                    <tr>
+                                                        <td style={{ width: 400 }}>{option.VoucherId}</td>
+                                                        <td>{option.BuyerName}</td>
+                                                        <td>{option.BuyerPhone}</td>
+                                                        <td>{option.VoucherRefer}</td>
+                                                    </tr>
+                                                </tbody>
                                             )}
-                                        </div>
-                                    )
-                                    }
+                                        </table>
 
+
+                                    )}
                                 />
                             </div>
-
-                            <div className='col-span-2 mt-4'>
-                                <button
-                                    type="button"
-                                    data-mdb-ripple="true"
-                                    data-mdb-ripple-color="light"
-                                    className="inline-block px-4 mr-2 py-1.5 bg-blue-600 text-white font-medium text-xs leading-tight rounded shadow-md hover:bg-blue-700 hover:shadow-lg hover:scale-110 focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-900  active:-translate-y-1 active:shadow-lg transform-all duration-150 ease-in-out"
-                                    onClick={() => {
-                                        if (tempPrevVouchNo?.VoucherId) {
-                                            handleOnSelectPrevVouch(tempPrevVouchNo);
-                                        }
-                                        else {
-                                            toast.warning('You cannot set empty voucher no. as previous voucher')
-                                        }
-                                    }}
-                                >Set Prevoius Voucher</button>
-
-                                <button
-                                    type="button"
-                                    data-mdb-ripple="true"
-                                    data-mdb-ripple-color="light"
-                                    className="inline-block px-4 py-1.5 bg-blue-600 text-white font-medium text-xs leading-tight rounded shadow-md hover:bg-blue-700 hover:shadow-lg hover:scale-110 focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-900  active:-translate-y-1 active:shadow-lg transform-all duration-150 ease-in-out"
-                                    onClick={() => {
-                                        handlePrevModalClose();
-                                    }}
-                                >Discard</button>
-                            </div>
-
                         </div>
                     </fieldset>
                 </Box>

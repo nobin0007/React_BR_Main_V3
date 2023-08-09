@@ -39,6 +39,16 @@ import { redirect, useNavigate } from 'react-router-dom';
 
 
 
+//session infos global var
+var userInfo = { Name: '', LocationId: '' };
+if (localStorage.getItem("userInfo")) {
+  userInfo = JSON.parse(localStorage.getItem("userInfo"));
+  console.log("Session User");
+  console.log(userInfo);
+}
+
+
+
 const prodGroupModalStyle = {
   position: 'absolute',
   top: '50%',
@@ -296,12 +306,12 @@ const ProductionPlantAndGroup = (props) => {
   // ---[show/hide panel,navbar]---
   const navigate = useNavigate();
 
-  var userInfo = { Name: '', LocationId: '' };
-  if (localStorage.getItem("userInfo")) {
-    userInfo = JSON.parse(localStorage.getItem("userInfo"));
-    console.log("Session User");
-    console.log(userInfo);
-  }
+  // var userInfo = { Name: '', LocationId: '' };
+  // if (localStorage.getItem("userInfo")) {
+  //   userInfo = JSON.parse(localStorage.getItem("userInfo"));
+  //   console.log("Session User");
+  //   console.log(userInfo);
+  // }
   if (!(localStorage.getItem("userInfo"))) {
     navigate('/');
   }

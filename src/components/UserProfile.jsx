@@ -243,8 +243,8 @@ const UserProfile = () => {
 
         var companyOpts = [
             { Name: 'Startech Retail Server 2', Ip: 'https://221.120.99.28:44331', CompanyId: 1 },
-            { Name: 'THE DATABIZ SOFTWARE LTD.', Ip: 'https://retail.startech.com.bd:48081', CompanyId: 1 },
-            { Name: 'Trade International Ltd.', Ip: 'https://retail.startech.com.bd:48081', CompanyId: 2 }
+            { Name: 'THE DATABIZ SOFTWARE LTD.', Ip: 'https://27.54.150.30:700', CompanyId: 1 },
+            { Name: 'Trade International Ltd.', Ip: 'https://27.54.150.30:700', CompanyId: 2 }
         ];
 
         setCompanyOptions(companyOpts);

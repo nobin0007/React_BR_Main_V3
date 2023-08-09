@@ -84,8 +84,15 @@ const ContraVoucher = (props) => {
 
     const { voucherToEdit, setVoucherToEdit, jvToEdit, setJvToEdit, contraVouchToEdit, setContraVouchToEdit, debitVouchToEdit, setDebitVouchToEdit, creditVouchToEdit, setCreditVouchToEdit, vouchAgtVouchToEdit, setVouchAgtVouchToEdit } = useStateContext();
 
-    // ---[show/hide panel,navbar]---
+
+    //CHECK if userInfo is availaible, if not, redirect to login
     const navigate = useNavigate();
+    if (!(localStorage.getItem("userInfo"))) {
+        navigate('/');
+    }
+
+
+    // ---[show/hide panel,navbar]---
     const { setShowPanel, setShowNavbar } = useStateContext();
     useEffect(() => {
         setShowPanel(props.panelShow);
@@ -100,9 +107,7 @@ const ContraVoucher = (props) => {
         console.log("Session User");
         console.log(userInfo);
     }
-    if (!(localStorage.getItem("userInfo"))) {
-        navigate('/');
-    }
+
     const [attachments, setAttachments] = useState([]);
     const { register, getValues, reset, control, setValue } = useForm();
 
@@ -1202,7 +1207,7 @@ const ContraVoucher = (props) => {
                                             options={location}
                                             // defaultValue={(locationOutput) ? locationOutput : { Name: "", LocationId: "" }}
                                             value={locationOutput}
-                                            readOnly={voucherIs ? true : false}
+                                            readOnly={true}
                                             // defaultValue={locationOutput?.Name ? locationOutput?.Name : ''}
                                             getOptionLabel={(option) => (option.Name) ? option.Name : ""}
 

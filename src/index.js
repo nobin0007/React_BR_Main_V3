@@ -5,6 +5,10 @@ import './index.css';
 import App from './App';
 import { ContextProvider } from './contexts/ContextProvider';
 
+
+
+// const Swal = require('sweetalert2');
+
 ReactDOM.render(
     <ContextProvider>
         <App />

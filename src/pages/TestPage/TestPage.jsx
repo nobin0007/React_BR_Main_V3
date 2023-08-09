@@ -32,7 +32,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 
 
 import { useForm, Controller } from "react-hook-form";
-import './JournalVoucher.css';
+import './TestPage.css';
 
 // material table
 import MaterialReactTable, { MRT_ColumnDef } from 'material-react-table';
@@ -155,25 +155,22 @@ const NameComponent = (props) => {
 }
 
 
-const JournalVoucher = (props) => {
+const TestPage = (props) => {
 
-    //CHECK if userInfo is availaible, if not, redirect to login
-    const navigate = useNavigate();
-    if (!(localStorage.getItem("userInfo"))) {
-        navigate('/');
-    }
+    const { voucherToEdit, setVoucherToEdit, contraVouchToEdit, setContraVouchToEdit, debitVouchToEdit, setDebitVouchToEdit, creditVouchToEdit, setCreditVouchToEdit, vouchAgtVouchToEdit, setVouchAgtVouchToEdit } = useStateContext();
 
-    const { voucherToEdit, setVoucherToEdit, jvToEdit, setJvToEdit, contraVouchToEdit, setContraVouchToEdit, debitVouchToEdit, setDebitVouchToEdit, creditVouchToEdit, setCreditVouchToEdit, vouchAgtVouchToEdit, setVouchAgtVouchToEdit } = useStateContext();
+    const [voucherNoToPreview, setVoucherNoToPreview] = useState({ VoucherNo: '', VoucherId: '' })
 
     // ---[show/hide panel,navbar]---
-
+    const navigate = useNavigate();
     const { setShowPanel, setShowNavbar } = useStateContext();
     useEffect(() => {
         setShowPanel(props.panelShow);
         setShowNavbar(props.navbarShow);
+        setVoucherNoToPreview(props.VoucherToPrev)
     }, [])
 
-    console.log(jvToEdit);
+    console.log(voucherNoToPreview);
 
     var userInfo = { Name: '', LocationId: '' };
     var brFeatures = JSON.parse(localStorage.getItem("brFeature"));
@@ -183,6 +180,10 @@ const JournalVoucher = (props) => {
         console.log(userInfo);
 
     }
+    if (!(localStorage.getItem("userInfo"))) {
+        navigate('/');
+    }
+
 
     //br feature acc analysis check
     // const [varAccAnalysisBF, setVarAccAnalysisBF] = useState(false);
@@ -262,65 +263,9 @@ const JournalVoucher = (props) => {
         if (currentRow?.nameClues) {
             axios.post(`${userInfo.Ip}/API/JournalVoucher/GetAutoCompOptions`, currentRow.nameClues)
                 .then(res => {
-                    console.log("rupom post re get banaise>>>>>>>>>>>>>>>>>>>>!!")
+                    console.log("rupom post re get banaise!!")
                     if (res) {
                         console.log(res.data);
-
-                        //jodi feature: VariableAccountAnalysisMandatoryInput true thake tahole location autocomp jodi registered thake kono account head er against e, oi autocomplete e default value user er logged in location hoye thakbe...another thing, jodi user head office er hoy, tahole head office to porei thakbe, and options e head office shoho shob location e dekhabe............ jodi user head office er na hoy, tahole tahole options e oi branch er name sara aar kono option dekhabena.......... 
-
-                        // STARTS HERE--------------------------------------------------------------------------->
-                        console.log(' STARTS HERE--------------------------------------------------------------------------->');
-                        console.log(brFeatures.VariableAccountAnalysisMandatoryInput);
-                        if (brFeatures.VariableAccountAnalysisMandatoryInput) {
-
-                            const locationAutoCompObject = res.data.find(item => item.InputName == 'Location');
-                            // const locationAutoCompObjectIndex = res.data.findIndex(item => item.InputName == 'Location');
-                            if (locationAutoCompObject) {
-
-                                let pureLocationName = userInfo.LocationName.replace(/\s/g, '').toLowerCase();
-
-                                //removing options if logged in not from head office
-                                if (!(pureLocationName == 'headoffice')) {
-                                    const theOnlyLocation = locationAutoCompObject.InputOptions.find(item => item.Id == userInfo.LocationId);
-                                    locationAutoCompObject.InputOptions = [];
-                                    locationAutoCompObject.InputOptions.push(theOnlyLocation);
-                                }
-                                // assigining default location value
-                                const theOnlyLocation = locationAutoCompObject.InputOptions.find(item => item.Id == userInfo.LocationId);
-
-                                //lets see if the location value already exist/assigned in name array
-                                let existFlag = currentRow.name.findIndex(item => item.InputName == theOnlyLocation.InputName)
-                                console.log("existFlag >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-                                console.log(existFlag);
-
-                                if (!(existFlag > -1)) {
-                                    currentRow.name.push(theOnlyLocation);
-                                }
-                            }
-
-                        }
-                        // Achsa, ekhon MandatoryInput Feature true thakuk ar na thakuk head office location er user sara onno kono user autocomplete er location e taar location baade onno kono location paabena,, eita else e ase
-                        else {
-                            const locationAutoCompObject = res.data.find(item => item.InputName == 'Location');
-                            // const locationAutoCompObjectIndex = res.data.findIndex(item => item.InputName == 'Location');
-                            if (locationAutoCompObject) {
-
-                                let pureLocationName = userInfo.LocationName.replace(/\s/g, '').toLowerCase();
-
-                                //removing options if logged in not from head office
-                                if (!(pureLocationName == 'headoffice')) {
-                                    const theOnlyLocation = locationAutoCompObject.InputOptions.find(item => item.Id == userInfo.LocationId);
-                                    locationAutoCompObject.InputOptions = [];
-                                    locationAutoCompObject.InputOptions.push(theOnlyLocation);
-                                }
-                            }
-                        }
-
-
-                        //ENDS HERE------------------------------>
-
-
-
                         setNameModalInputs({
                             rowIndex: currentRowIndex,
                             inputs: res.data
@@ -416,7 +361,7 @@ const JournalVoucher = (props) => {
                     )}
                     renderInput={(params) =>
                         <TextField
-                            sx={{ width: "100%" }}
+                            sx={{ width: "100%", readOnly: true }}
                             {...params}
                             inputRef={(node) => {
                                 if (node) {
@@ -474,7 +419,7 @@ const JournalVoucher = (props) => {
                     )}
                     renderInput={(params) =>
                         <TextField
-                            sx={{ width: "100%" }}
+                            sx={{ width: "100%", readOnly: true }}
                             {...params}
                             inputRef={(node) => {
                                 if (node) {
@@ -495,7 +440,7 @@ const JournalVoucher = (props) => {
             // enableSorting: false,
             // enableColumnActions: false,
             Cell: ({ cell, column, table }) => (
-                <TextField sx={{ width: '100%' }} InputProps={{ style: { fontSize: 13 }, disableUnderline: true }}
+                <TextField sx={{ width: '100%', readOnly: true }} InputProps={{ style: { fontSize: 13 }, disableUnderline: true }}
                     variant="standard" size="small"
                     inputRef={node => {
                         if (node) {
@@ -518,7 +463,7 @@ const JournalVoucher = (props) => {
             // enableSorting: true,
             // enableColumnActions: true,
             Cell: ({ cell, column, table }) => (
-                <TextField sx={{ width: '100%' }} InputProps={{ style: { fontSize: 13 }, disableUnderline: true }}
+                <TextField sx={{ width: '100%', readOnly: true }} InputProps={{ style: { fontSize: 13 }, disableUnderline: true }}
                     variant="standard" size="small"
                     inputRef={node => {
                         if (node) {
@@ -563,7 +508,7 @@ const JournalVoucher = (props) => {
             accessorKey: 'credit', //access nested data with dot notation
             header: 'Credit',
             Cell: ({ cell, column, table }) => (
-                <TextField sx={{ width: '100%' }} InputProps={{ style: { fontSize: 13 }, disableUnderline: true }}
+                <TextField sx={{ width: '100%', readOnly: true }} InputProps={{ style: { fontSize: 13 }, disableUnderline: true }}
                     variant="standard" size="small"
                     inputRef={node => {
                         if (node) {
@@ -723,7 +668,7 @@ const JournalVoucher = (props) => {
                     )}
                     renderInput={(params) =>
                         <TextField
-                            sx={{ width: "100%" }}
+                            sx={{ width: "100%", readOnly: true }}
                             {...params}
                             inputRef={(node) => {
                                 if (node) {
@@ -745,7 +690,7 @@ const JournalVoucher = (props) => {
             // enableColumnActions: false,
             Cell: ({ cell, column, table }) => (
                 <TextField
-                    sx={{ width: '100%' }}
+                    sx={{ width: '100%', readOnly: true }}
                     value={(voucherTableData[cell.row.index].controlAccName.Name) ? (voucherTableData[cell.row.index].controlAccName.Name) : ""}
                     tabIndex="-1"
                     InputProps={{ style: { fontSize: 13 }, disableUnderline: true, readOnly: true }}
@@ -781,7 +726,7 @@ const JournalVoucher = (props) => {
                     )}
                     renderInput={(params) =>
                         <TextField
-                            sx={{ width: "100%" }}
+                            sx={{ width: "100%", readOnly: true }}
                             {...params}
                             inputRef={(node) => {
                                 if (node) {
@@ -802,7 +747,7 @@ const JournalVoucher = (props) => {
             // enableSorting: false,
             // enableColumnActions: false,
             Cell: ({ cell, column, table }) => (
-                <TextField sx={{ width: '100%' }} InputProps={{ style: { fontSize: 13 }, disableUnderline: true }}
+                <TextField sx={{ width: '100%', readOnly: true }} InputProps={{ style: { fontSize: 13 }, disableUnderline: true }}
                     variant="standard" size="small"
                     inputRef={node => {
                         if (node) {
@@ -825,7 +770,7 @@ const JournalVoucher = (props) => {
             // enableSorting: true,
             // enableColumnActions: true,
             Cell: ({ cell, column, table }) => (
-                <TextField sx={{ width: '100%' }} InputProps={{ style: { fontSize: 13 }, disableUnderline: true }}
+                <TextField sx={{ width: '100%', readOnly: true }} InputProps={{ style: { fontSize: 13 }, disableUnderline: true }}
                     variant="standard" size="small"
                     inputRef={node => {
                         if (node) {
@@ -863,7 +808,7 @@ const JournalVoucher = (props) => {
             accessorKey: 'credit', //access nested data with dot notation
             header: 'Credit',
             Cell: ({ cell, column, table }) => (
-                <TextField sx={{ width: '100%' }} InputProps={{ style: { fontSize: 13 }, disableUnderline: true }}
+                <TextField sx={{ width: '100%', readOnly: true }} InputProps={{ style: { fontSize: 13 }, disableUnderline: true }}
                     variant="standard" size="small"
                     inputRef={node => {
                         if (node) {
@@ -929,7 +874,7 @@ const JournalVoucher = (props) => {
                     )}
                     renderInput={(params) =>
                         <TextField
-                            sx={{ width: "100%" }}
+                            sx={{ width: "100%", readOnly: true }}
                             {...params}
                             inputRef={(node) => {
                                 if (node) {
@@ -999,14 +944,14 @@ const JournalVoucher = (props) => {
     // -----[FETCH Data for edit/assigning]-----
     useEffect(() => {
         console.log("line no 517");
-        console.log(jvToEdit);
+        console.log(voucherNoToPreview);
 
-        if (jvToEdit?.VoucherId) {
+        if (voucherNoToPreview?.VoucherId) {
             console.log("varAccAnalysisBF er value..........");
             console.log(brFeatures?.VariableAccountAnalysis);
 
             if (brFeatures?.VariableAccountAnalysis) {
-                fetch(`${userInfo.Ip}/API/JournalVoucher/Get_VoucherAllInfoFeatOn?voucherNo=${jvToEdit.VoucherNo}&voucherId=${jvToEdit.VoucherId}`)
+                fetch(`${userInfo.Ip}/API/JournalVoucher/Get_VoucherAllInfoFeatOn?voucherNo=${voucherNoToPreview.VoucherNo}&voucherId=${voucherNoToPreview.VoucherId}`)
                     .then(res =>
                         res.json()
                         // console.log(res);
@@ -1019,7 +964,7 @@ const JournalVoucher = (props) => {
                     })
             }
             else {
-                fetch(`${userInfo.Ip}/API/JournalVoucher/Get_VoucherAllInfo?voucherNo=${jvToEdit.VoucherNo}&voucherId=${jvToEdit.VoucherId}`)
+                fetch(`${userInfo.Ip}/API/JournalVoucher/Get_VoucherAllInfo?voucherNo=${voucherNoToPreview.VoucherNo}&voucherId=${voucherNoToPreview.VoucherId}`)
                     .then(res =>
                         res.json()
                         // console.log(res);
@@ -1200,11 +1145,6 @@ const JournalVoucher = (props) => {
                     prevTableDataOld[index].credit = 0;
                 }
 
-                //reseting nameclues and name, if anything was previously in, it should be removed if any account head is selected
-                prevTableDataOld[index].nameClues = [];
-                prevTableDataOld[index].name = [];
-
-
                 // debugger;
                 fetch(`${userInfo.Ip}/API/JournalVoucher/GetRequiredInputInfos?accountId=${selectedOption.AccountsId}&companyId=${userInfo.CompanyId}&locationId=${userInfo.LocationId}`, {
                     method: 'GET',
@@ -1219,41 +1159,7 @@ const JournalVoucher = (props) => {
                             console.log("data2 er length 0 theke greater");
 
                             prevTableDataOld[index].nameClues = [...data2];
-
-                            //on headselection, jodi oi head e location assigned thake, and jodi VariableAccountAnalysisMandatoryField true hoy tahole, user j location e logged in oi location name column e porbe... STARTS HERE>>>>>>>>>>>
-                            if (brFeatures.VariableAccountAnalysisMandatoryInput) {
-
-                                let tempIndex = data2.findIndex(item => item.InputName == 'Location');
-                                let tempObj = data2.find(item => item.InputName == 'Location');
-
-                                if (tempIndex > -1) {
-                                    axios.post(`${userInfo.Ip}/API/JournalVoucher/GetAutoCompOptions`, data2)
-                                        .then(res => {
-                                            if (res) {
-                                                console.log('results rupo rupom>>>>>>>>>>>>>>>>>>');
-                                                console.log(res);
-                                                let tempvar = res.data.find(item => item.InputName == 'Location');
-                                                console.log(tempvar);
-                                                let desiredLocation = tempvar.InputOptions.find(item => item.Id == userInfo.LocationId);
-                                                console.log('desired location>>>>>>>>>>>>>');
-                                                console.log(desiredLocation);
-
-                                                // prevTableDataOld[index].name = [];
-                                                (prevTableDataOld[index].name).push(desiredLocation);
-
-                                                console.log("prevTableDataOld hohoo>>>>>>>>>>>>>>>>>>>");
-                                                console.log(prevTableDataOld);
-
-                                                setVoucherTableData([...prevTableDataOld]);
-                                                setdebitCreditWatch((prev) => !prev);
-                                            }
-                                        })
-                                }
-
-                            }
-                            // ENDS HERE>>>>>>>>>>>>>>>>>>>>>>>>
-
-                            console.log(prevTableDataOld[index].nameClues);
+                            console.log(prevTableDataOld[index].nameClues)
                         }
 
                         // --[checking if the accound head is getting selected in the last row, if does, insert another empty row below(auto adding row)]--
@@ -1261,7 +1167,7 @@ const JournalVoucher = (props) => {
                             prevTableDataOld.push({ accountHead: { Name: "", AccountsId: "" }, controlAccName: { Name: "", id: "" }, project: { Name: "", Code: "", ProjectId: "" }, particulars: "", debit: "", credit: "", name: [], nameClues: [] });
                         }
 
-                        console.log("rupom wants to see prevTableOld------------->>>>>>>>>>-")
+                        console.log("rupom wants to see prevTableOld--------------")
 
                         console.log(prevTableDataOld);
                         setVoucherTableData([...prevTableDataOld]);
@@ -1405,7 +1311,7 @@ const JournalVoucher = (props) => {
                             )
                             .then((data) => {
                                 console.log("Fetched AGAIN AFTER Save, Raw data for voucher Edit, Line No. 716.....");
-                                setJvToEdit(0); //context api voucherEdit state reset
+                                setvoucherNoToPreview(0); //context api voucherEdit state reset
                                 assignDataForEdit(data.Voucher.Date, data.Voucher.LocationId, data.Location.Name, data.Voucher.VoucherId, data.Voucher.VoucherNo, data.Voucher.AttachmentId, data.Voucher.ReferenceNo, data.Voucher.Description, data.V_VoucherDetailRows, data.Attachment?.AttachmentData_List);
                             })
                         // reset();
@@ -1576,7 +1482,7 @@ const JournalVoucher = (props) => {
                             )
                             .then((data) => {
                                 console.log("Feature ON!!! Fetched AGAIN AFTER Save, Raw data for voucher Edit,,,,, FEATURE ON!!!!");
-                                setJvToEdit(0); //context api voucherEdit state reset
+                                setvoucherNoToPreview(0); //context api voucherEdit state reset
                                 console.log(data);
                                 assignDataForEditFeatOn(data.Voucher.Date, data.Voucher.LocationId, data.Location.Name, data.Voucher.VoucherId, data.Voucher.VoucherNo, data.Voucher.AttachmentId, data.Voucher.ReferenceNo, data.Voucher.Description, data.V_VoucherDetailRows, data.Attachment?.AttachmentData_List);
                             })
@@ -2080,7 +1986,7 @@ const JournalVoucher = (props) => {
                                     )
                                     .then((data) => {
                                         console.log("Fetched AGAIN AFTER UPDATE Raw data for voucher Edit, Line No. 517.....");
-                                        setJvToEdit(0);
+                                        setvoucherNoToPreview(0);
                                         assignDataForEdit(data.Voucher.Date, data.Voucher.LocationId, data.Location.Name, data.Voucher.VoucherId, data.Voucher.VoucherNo, data.Voucher.AttachmentId, data.Voucher.ReferenceNo, data.Voucher.Description, data.V_VoucherDetailRows, data.Attachment?.AttachmentData_List);
                                     })
 
@@ -2306,7 +2212,7 @@ const JournalVoucher = (props) => {
                                     )
                                     .then((data) => {
                                         console.log("Fetched AGAIN AFTER UPDATE Raw data for voucher Edit, Line No. 517.....");
-                                        setJvToEdit(0);
+                                        setvoucherNoToPreview(0);
                                         assignDataForEditFeatOn(data.Voucher.Date, data.Voucher.LocationId, data.Location.Name, data.Voucher.VoucherId, data.Voucher.VoucherNo, data.Voucher.AttachmentId, data.Voucher.ReferenceNo, data.Voucher.Description, data.V_VoucherDetailRows, data.Attachment?.AttachmentData_List);
                                     })
 
@@ -2331,14 +2237,14 @@ const JournalVoucher = (props) => {
     }
 
     const editVouchBtn = () => {
-        setJvToEdit({});
+        setvoucherNoToPreview({});
         navigate('/voucherEdit');
     }
     //-----[codes to execute while the page gets unmounted]-------
     useEffect(() => {
         return () => {
             // Anything in here is fired on component unmount.
-            setJvToEdit(0);
+            setvoucherNoToPreview(0);
             setContraVouchToEdit(0);
             setDebitVouchToEdit(0);
             setCreditVouchToEdit(0);
@@ -2369,7 +2275,7 @@ const JournalVoucher = (props) => {
                     <div className="block rounded-lg shadow-lg bg-white dark:bg-secondary-dark-bg  text-center">
                         {/* Main Card header */}
                         <div className="py-3 'bg-white text-xl dark:text-gray-200 text-start px-6 border-b border-gray-300">
-                            Journal Voucher
+                            Voucher Preview
                         </div>
                         {/* Main Card header--/-- */}
 
@@ -2392,7 +2298,7 @@ const JournalVoucher = (props) => {
                                                 readOnly={voucherIs ? true : false}
                                                 renderInput={(params) =>
                                                     <TextField
-                                                        sx={{ width: '100%', marginTop: 1 }}
+                                                        sx={{ width: '100%', marginTop: 1, readOnly: true }}
                                                         {...params}
                                                         {...register("voucherDate")}
                                                         // defaultValue={voucherDateState}
@@ -2423,9 +2329,7 @@ const JournalVoucher = (props) => {
                                             options={location}
                                             // defaultValue={(locationOutput) ? locationOutput : { Name: "", LocationId: "" }}
                                             value={locationOutput}
-                                            // readOnly={voucherIs ? true : false}
-                                            readOnly={true}
-
+                                            readOnly={voucherIs ? true : false}
                                             // defaultValue={locationOutput?.Name ? locationOutput?.Name : ''}
                                             getOptionLabel={(option) => (option.Name) ? option.Name : ""}
 
@@ -2435,7 +2339,7 @@ const JournalVoucher = (props) => {
                                             }}
                                             renderInput={(params) => (
                                                 <TextField
-                                                    sx={{ width: '100%', marginTop: 1 }}
+                                                    sx={{ width: '100%', marginTop: 1, readOnly: true }}
                                                     {...params}
                                                     {...register("location")}
 
@@ -2457,7 +2361,7 @@ const JournalVoucher = (props) => {
                                             render={({ field }) => (
                                                 <TextField
                                                     {...field}
-                                                    sx={{ width: '100%' }} InputProps={{ style: { fontSize: 13 }, readOnly: true }}
+                                                    sx={{ width: '100%', readOnly: true }} InputProps={{ style: { fontSize: 13 }, readOnly: true }}
                                                     InputLabelProps={{
                                                         style: { fontSize: 14 },
                                                         // shrink: field.value
@@ -2487,7 +2391,7 @@ const JournalVoucher = (props) => {
                                             render={({ field }) => (
                                                 <TextField
                                                     {...field}
-                                                    sx={{ width: '100%' }} InputProps={{ style: { fontSize: 13 } }}
+                                                    sx={{ width: '100%', readOnly: true }} InputProps={{ style: { fontSize: 13 } }}
                                                     InputLabelProps={{
                                                         style: { fontSize: 14 },
                                                         shrink: field.value
@@ -2515,7 +2419,7 @@ const JournalVoucher = (props) => {
                                                 render={({ field }) => (
                                                     <TextField
                                                         {...field}
-                                                        sx={{ width: '100%' }} InputProps={{ style: { fontSize: 13 } }}
+                                                        sx={{ width: '100%', readOnly: true }} InputProps={{ style: { fontSize: 13 } }}
                                                         InputLabelProps={{
                                                             style: { fontSize: 14 },
                                                             shrink: field.value
@@ -2823,7 +2727,7 @@ const JournalVoucher = (props) => {
                                         }
                                         renderInput={(params) => (
                                             <TextField
-                                                sx={{ width: '100%', marginTop: 1 }}
+                                                sx={{ width: '100%', readOnly: true, marginTop: 1 }}
                                                 {...params}
                                                 // {...register("plantNameSel")}
 
@@ -2849,4 +2753,4 @@ const JournalVoucher = (props) => {
     )
 }
 
-export default JournalVoucher
+export default TestPage

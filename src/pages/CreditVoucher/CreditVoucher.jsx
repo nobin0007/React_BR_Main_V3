@@ -258,8 +258,14 @@ const CreditVoucher = (props) => {
 
     const { voucherToEdit, setVoucherToEdit, jvToEdit, setJvToEdit, contraVouchToEdit, setContraVouchToEdit, debitVouchToEdit, setDebitVouchToEdit, creditVouchToEdit, setCreditVouchToEdit, vouchAgtVouchToEdit, setVouchAgtVouchToEdit } = useStateContext();
 
-    // ---[show/hide panel,navbar]---
+
+    //CHECK if userInfo is availaible, if not, redirect to login
     const navigate = useNavigate();
+    if (!(localStorage.getItem("userInfo"))) {
+        navigate('/');
+    }
+
+    // ---[show/hide panel,navbar]---
     const { setShowPanel, setShowNavbar } = useStateContext();
     useEffect(() => {
         setShowPanel(props.panelShow);
@@ -276,9 +282,7 @@ const CreditVoucher = (props) => {
         console.log("Session User");
         console.log(userInfo);
     }
-    if (!(localStorage.getItem("userInfo"))) {
-        navigate('/');
-    }
+
     const [attachments, setAttachments] = useState([]);
     const { register, getValues, reset, control, setValue } = useForm();
 
@@ -518,7 +522,7 @@ const CreditVoucher = (props) => {
                     onBlur={(e) => {
                         if (e.target.value > 0) {
                             if (voucherTableData[cell.row.index].accountHead.AccountsId) {
-                                voucherTableData[cell.row.index].credit = e.target.value;
+                                voucherTableData[cell.row.index].credit = parseFloat((e.target.value)).toFixed(2);
                                 setVoucherTableData([...voucherTableData]);
                                 setdebitCreditWatch((prev) => !prev);
                             }
@@ -759,7 +763,7 @@ const CreditVoucher = (props) => {
                     onBlur={(e) => {
                         if (e.target.value > 0) {
                             if (voucherTableData[cell.row.index].accountHead.AccountsId) {
-                                voucherTableData[cell.row.index].credit = e.target.value;
+                                voucherTableData[cell.row.index].credit = parseFloat((e.target.value)).toFixed(2);
                                 setVoucherTableData([...voucherTableData]);
                                 setdebitCreditWatch((prev) => !prev);
                             }
@@ -954,10 +958,10 @@ const CreditVoucher = (props) => {
 
         for (let i = 0; i < voucherTableData.length; i++) {
             if (voucherTableData[i].credit) {
-                totalCredit = totalCredit + (isNaN(parseInt(voucherTableData[i].credit)) ? 0 : parseInt(voucherTableData[i].credit));
+                totalCredit = totalCredit + (isNaN(parseFloat(voucherTableData[i].credit)) ? 0 : parseFloat(voucherTableData[i].credit));
             }
         }
-        setTotal({ credit: totalCredit });
+        setTotal({ credit: totalCredit.toFixed(2) });
         console.log(total);
     }, [debitCreditWatch])
 
@@ -1348,7 +1352,7 @@ const CreditVoucher = (props) => {
 
             if (!rowIsEmpty) {
 
-                let perRowCredit = isNaN(parseInt(tableAllRows[i].credit)) ? 0 : parseInt(tableAllRows[i].credit);
+                let perRowCredit = isNaN(parseFloat(tableAllRows[i].credit)) ? 0 : parseFloat(tableAllRows[i].credit);
                 let propertyName = `${tableAllRows[i].name.TableName}Id`
                 let perRowForbackend = {};
 
@@ -1526,7 +1530,7 @@ const CreditVoucher = (props) => {
 
             if (!rowIsEmpty) {
 
-                let perRowCredit = isNaN(parseInt(tableAllRows[i].credit)) ? 0 : parseInt(tableAllRows[i].credit);
+                let perRowCredit = isNaN(parseFloat(tableAllRows[i].credit)) ? 0 : parseFloat(tableAllRows[i].credit);
                 let perRowForbackend = {};
 
                 let nameFields = {};
@@ -2055,7 +2059,7 @@ const CreditVoucher = (props) => {
 
             if (!rowIsEmpty) {
 
-                let perRowCredit = isNaN(parseInt(tableAllRows[i].credit)) ? 0 : parseInt(tableAllRows[i].credit);
+                let perRowCredit = isNaN(parseFloat(tableAllRows[i].credit)) ? 0 : parseFloat(tableAllRows[i].credit);
                 let propertyName = `${tableAllRows[i].name.TableName}Id`;
                 let perRowForbackend = {};
 
@@ -2309,7 +2313,7 @@ const CreditVoucher = (props) => {
 
             if (!rowIsEmpty) {
 
-                let perRowCredit = isNaN(parseInt(tableAllRows[i].credit)) ? 0 : parseInt(tableAllRows[i].credit);
+                let perRowCredit = isNaN(parseFloat(tableAllRows[i].credit)) ? 0 : parseFloat(tableAllRows[i].credit);
                 // let propertyName = `${tableAllRows[i].name.TableName}Id`;
                 let perRowForbackend = {};
 
@@ -2789,7 +2793,7 @@ const CreditVoucher = (props) => {
                                             options={location}
                                             // defaultValue={(locationOutput) ? locationOutput : { Name: "", LocationId: "" }}
                                             value={locationOutput}
-                                            readOnly={voucherIs ? true : false}
+                                            readOnly={true}
                                             // defaultValue={locationOutput?.Name ? locationOutput?.Name : ''}
                                             getOptionLabel={(option) => (option.Name) ? option.Name : ""}
 

@@ -50,7 +50,7 @@ const Login_BR = (props) => {
     useEffect(() => {
 
 
-        fetch('http://221.120.99.25:8082/API/Login/Get_Company')
+        fetch('https://27.54.150.30:700/API/Login/Get_Company')
             .then(res =>
                 res.json()
                 // console.log(res);
@@ -72,7 +72,7 @@ const Login_BR = (props) => {
         var formData = getValues();
         console.log(formData);
         ;
-        axios.get('http://221.120.99.25:8082/API/Login/Get_UserPassMatch', { params: formData })
+        axios.get('https://27.54.150.30:700/API/Login/Get_UserPassMatch', { params: formData })
             .then(res => {
                 console.log("insert er axios!!")
                 if (res.data.UserName) {
@@ -88,10 +88,10 @@ const Login_BR = (props) => {
                         LocationName: formData.locationName,
                         LocationId: res.data.LocationId,
                         Password: formData.password,
-                        Ip: 'http://221.120.99.25:8082',
+                        Ip: 'https://27.54.150.30:700',
 
                     };
-                    fetch(`http://221.120.99.25:8082/API/JournalVoucher/CheckBrFeatures?companyId=${res.data.CompanyId}`)
+                    fetch(`https://27.54.150.30:700/API/JournalVoucher/CheckBrFeatures?companyId=${res.data.CompanyId}`)
                         .then(res =>
                             res.json()
                             // console.log(res);
@@ -174,7 +174,7 @@ const Login_BR = (props) => {
                                         unregister("companyName");
                                         register("companyId", { value: selectedOption.CompanyId })
                                         register("companyName", { value: selectedOption.Name })
-                                        fetch(`http://221.120.99.25:8082/API/Login/Get_Location?companyId=${selectedOption.CompanyId}`)
+                                        fetch(`https://27.54.150.30:700/API/Login/Get_Location?companyId=${selectedOption.CompanyId}`)
                                             .then(res =>
                                                 res.json()
                                                 // console.log(res);

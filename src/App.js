@@ -9,16 +9,25 @@ import { useStateContext } from './contexts/ContextProvider';
 import './App.css'
 import { ThemeProvider, createTheme } from '@mui/material';
 import JournalVoucher from './pages/JournalVoucher/JournalVoucher';
+
+
 import FileLoader from './pages/FileLoader';
 import Login_BR from './pages/Login/Login_BR';
+// import JournalVoucherEdit from './pages/JournalVoucherEdit/JournalVoucherEdit';
+// import JournalVoucherSaveEdit from './pages/JournalVoucherEdit/JournalVoucherSaveEdit';
 import VoucherEdit from './pages/VoucherEdit/VoucherEdit';
+import VoucherPosting from './pages/VoucherPosting/VoucherPosting';
+import VoucherApproval from './pages/VoucherApproval/VoucherApproval';
+
 import DebitVoucher from './pages/DebitVoucher/DebitVoucher';
 import CreditVoucher from './pages/CreditVoucher/CreditVoucher';
 import ContraVoucher from './pages/ContraVoucher/ContraVoucher';
 import VoucherAgainstVoucher from './pages/VoucherAgainstVoucher/VoucherAgainstVoucher';
 import ProductionPlantAndGroup from './pages/ProductionPlantAndGroup/ProductionPlantAndGroup';
+// import JournalVoucherCopy from './pages/JournalVoucherCopy/JournalVoucherCopy';
 import NameAgtAccSetup from './pages/NameAgtAccSetup/NameAgtAccSetup';
 import AnalysisHeadAndGroup from './pages/AnalysisHeadAndGroup/AnalysisHeadAndGroup';
+import TestPage from './pages/TestPage/TestPage';
 
 const App = () => {
 
@@ -114,9 +123,15 @@ const App = () => {
 
                                         {/* dashboard hidden options */}
                                         <Route path="/journalVoucherIfrm" element={<JournalVoucher panelShow={false} navbarShow={true} />} />
+                                        <Route path="/testpage" element={<TestPage panelShow={false} navbarShow={false} />} />
+
                                         {/* <Route path="/journalVoucherTest" element={<JournalVoucherCopy panelShow={true} navbarShow={true} />} /> */}
 
                                         <Route path="/voucherEdit" element={<VoucherEdit panelShow={true} navbarShow={true} />} />
+                                        {/* <Route path="/voucherApproval" element={<VoucherApproval panelShow={true} navbarShow={true} />} /> */}
+                                        <Route path="/voucherPosting" element={<VoucherPosting panelShow={true} navbarShow={true} />} />
+                                        <Route path="/voucherApproval" element={<VoucherApproval panelShow={true} navbarShow={true} />} />
+
 
                                         <Route path="/debitVoucher" element={<DebitVoucher panelShow={true} navbarShow={true} />} />
                                         <Route path="/creditVoucher" element={<CreditVoucher panelShow={true} navbarShow={true} />} />

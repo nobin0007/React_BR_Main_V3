@@ -547,7 +547,16 @@ export const links = [
         path: 'voucherEdit',
         icon: <FiShoppingBag />,
       },
-
+      {
+        name: 'Voucher Approval',
+        path: 'voucherApproval',
+        icon: <FiShoppingBag />,
+      },
+      {
+        name: 'Voucher Posting',
+        path: 'voucherPosting',
+        icon: <FiShoppingBag />,
+      },
       {
         name: 'Name Agt Account Setup',
         path: 'nameAgtAccSetup',

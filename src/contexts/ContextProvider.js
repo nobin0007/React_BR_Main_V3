@@ -48,12 +48,16 @@ export const ContextProvider = ({ children }) => {
 
     const handleClick = (clicked) => {
         // console.log(isClicked);
+
+        //ekhane toggle er kaaj ta if else diye kora
         if (initialState.hasOwnProperty(clicked)) {
             setIsClicked({ ...initialState, [clicked]: !isClicked[clicked] });
         }
         else {
             setIsClicked({ ...initialState, [clicked]: true });
         }
+
+
     }
 
     return (
